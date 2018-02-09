@@ -1,9 +1,10 @@
 import './App.css';
 
 import React, { Component } from 'react';
+import { ToastContainer } from 'react-toastify';
+import { connect } from 'react-redux';
 
 import actions from './action';
-import { connect } from 'react-redux';
 
 class App extends Component {
   componentDidMount() {
@@ -23,7 +24,6 @@ class App extends Component {
       items,
       itemInput,
       addItemInProgress,
-      errorMessage,
       removeItem,
       onSubmitItem,
       onInputChange,
@@ -58,7 +58,7 @@ class App extends Component {
           />
           <input disabled={addItemInProgress} type="submit" value="Add" />
         </form>
-        {errorMessage ? <div>{`Erreur : ${errorMessage}`}</div> : null}
+        <ToastContainer type="error" hideProgressBar={true} />
       </div>
     );
   }
