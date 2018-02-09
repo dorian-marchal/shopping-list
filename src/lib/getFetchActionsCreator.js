@@ -50,14 +50,16 @@ const getFetchActionsCreator = (serverBaseUrl) =>
    *                   (default: _.noop).
    * @param {Function} options.onPending
    *                   Can be used to dispatch additional actions on pending state.
-   *                   Called with `dispatch` and `requestBody`. (default: _.noop).
+   *                   Called with `dispatch`, `getState` and `requestBody`.
+   *                   (default: _.noop).
    * @param {Function} options.onSuccess
    *                   Can be used to dispatch additional actions on success state.
-   *                   Called with `dispatch`, `requestBody` and `responseBody.
+   *                   Called with `dispatch`, `getState`, `requestBody` and `responseBody.
    *                   (default: _.noop).
    * @param {Function} options.onError
    *                   Can be used to dispatch additional actions on error state.
-   *                   Called with `dispatch` and `requestBody`. (default: _.noop).
+   *                   Called with `dispatch`, `getState` and `requestBody`.
+   *                   (default: _.noop).
    * @returns {Object} Created fetch actions:
    *                   `${type}`, `${type}_PENDING`, `${type}_SUCCESS` and `${type}_ERROR`.
    */
@@ -82,12 +84,12 @@ const getFetchActionsCreator = (serverBaseUrl) =>
       [success]: success,
       [error]: error,
       [type]: (...args) =>
-        async function(dispatch) {
+        async function(dispatch, getState) {
           const requestBody = createBody(...args);
 
           dispatch(pending(requestBody, { requestBody }));
           if (onPending) {
-            onPending(dispatch, requestBody);
+            onPending(dispatch, getState, requestBody);
           }
 
           let responseBody;
@@ -109,7 +111,7 @@ const getFetchActionsCreator = (serverBaseUrl) =>
           } catch (err) {
             dispatch(error(error, requestBody, { err, requestBody }));
             if (onError) {
-              onError(dispatch, err, requestBody);
+              onError(dispatch, getState, err, requestBody);
             }
             logger.error({ err });
             return;
@@ -117,7 +119,7 @@ const getFetchActionsCreator = (serverBaseUrl) =>
 
           dispatch(success(requestBody, responseBody, { requestBody, responseBody }));
           if (onSuccess) {
-            onSuccess(dispatch, requestBody, responseBody);
+            onSuccess(dispatch, getState, requestBody, responseBody);
           }
         },
     };

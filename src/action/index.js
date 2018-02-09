@@ -35,7 +35,8 @@ const actions = _.mapKeys(
       path: '/items/add',
       createBody: (item) => ({ item }),
       createSuccessPayload: (requestBody, responseBody) => ({ item: responseBody }),
-      onError: () => showError("Le produit n'a pas été ajouté."),
+      onError: (dispatch, getState, responseBody, { item }) =>
+        showError(`Le produit "${item}" n'a pas été ajouté.`),
     }),
     ...createFetchActions({
       type: 'REMOVE_ITEM',
@@ -45,7 +46,11 @@ const actions = _.mapKeys(
       createPendingPayload: (requestBody) => ({ id: requestBody.id }),
       createSuccessPayload: (requestBody) => ({ id: requestBody.id }),
       createErrorPayload: (_, requestBody) => ({ id: requestBody.id }),
-      onError: () => showError("Le produit n'a pas été supprimé."),
+      onError: (dispatch, getState, responseBody, { id }) => {
+        const { items } = getState();
+        const item = items.find((item) => item.id === id);
+        showError(`Le produit "${item.name}" n'a pas été supprimé.`);
+      },
     }),
   },
   (action, key) => _.camelCase(key),
