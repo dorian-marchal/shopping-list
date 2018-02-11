@@ -1,8 +1,7 @@
-import { createActions } from 'redux-actions';
-import { toast } from 'react-toastify';
-
 import _ from 'lodash';
+import { createActions } from 'redux-actions';
 import getFetchActionsCreator from '../lib/getFetchActionsCreator';
+import { toast } from 'react-toastify';
 
 const serverBaseUrl = 'http://localhost:3001';
 
@@ -35,7 +34,7 @@ const actions = _.mapKeys(
       path: '/items/add',
       createBody: (item) => ({ item }),
       createSuccessPayload: (requestBody, responseBody) => ({ item: responseBody }),
-      onError: (dispatch, getState, responseBody, { item }) =>
+      onError: (dispatch, getState, { item }) =>
         showError(`Le produit "${item}" n'a pas été ajouté.`),
     }),
     ...createFetchActions({
@@ -45,8 +44,8 @@ const actions = _.mapKeys(
       createBody: (id) => ({ id }),
       createPendingPayload: (requestBody) => ({ id: requestBody.id }),
       createSuccessPayload: (requestBody) => ({ id: requestBody.id }),
-      createErrorPayload: (_, requestBody) => ({ id: requestBody.id }),
-      onError: (dispatch, getState, responseBody, { id }) => {
+      createErrorPayload: (requestBody) => ({ id: requestBody.id }),
+      onError: (dispatch, getState, { id }) => {
         const { items } = getState();
         const item = items.find((item) => item.id === id);
         showError(`Le produit "${item.name}" n'a pas été supprimé.`);
