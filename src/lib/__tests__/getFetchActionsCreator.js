@@ -102,13 +102,12 @@ describe('getFetchActionsCreator', () => {
           afterEach(fetchMock.restore);
 
           it('fetches with POST method', async () => {
-            const { FOO } = createFetchActions({
+            const createdActions = createFetchActions({
               type: 'FOO',
               method: 'POST',
               path: '/foo/bar/update',
             });
-            const fetchThunk = FOO();
-            await fetchThunk(_.noop, _.noop);
+            await createdActions.FOO()(_.noop, _.noop);
 
             expect(fetchMock.done()).toBe(true);
           });
