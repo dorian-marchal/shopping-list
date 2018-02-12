@@ -1,12 +1,29 @@
 import './App.css';
 
 import React, { Component } from 'react';
+
+import PropTypes from 'prop-types';
 import { ToastContainer } from 'react-toastify';
+import actions from './action';
 import { connect } from 'react-redux';
 
-import actions from './action';
-
 class App extends Component {
+  static propTypes = {
+    fetchItems: PropTypes.func.isRequired,
+    addItemInProgress: PropTypes.bool.isRequired,
+    items: PropTypes.arrayOf(
+      PropTypes.shape({
+        id: PropTypes.number.isRequired,
+        name: PropTypes.string.isRequired,
+        removingInProgress: PropTypes.bool.isRequired,
+      }),
+    ).isRequired,
+    itemInput: PropTypes.string.isRequired,
+    removeItem: PropTypes.func.isRequired,
+    onSubmitItem: PropTypes.func.isRequired,
+    onInputChange: PropTypes.func.isRequired,
+  };
+
   componentDidMount() {
     const { fetchItems } = this.props;
     fetchItems();
@@ -70,3 +87,5 @@ export default connect((state) => state, {
   removeItem: actions.removeItem,
   fetchItems: actions.fetchItems,
 })(App);
+
+export { App as _App };

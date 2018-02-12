@@ -5,6 +5,7 @@ module.exports = {
     jest: true,
   },
   extends: ['eslint:recommended', 'prettier'],
+  parser: 'babel-eslint',
   parserOptions: {
     ecmaVersion: 2017,
     ecmaFeatures: {
@@ -20,6 +21,7 @@ module.exports = {
     semi: ['error', 'always'],
     'react/jsx-uses-react': 1,
     'react/jsx-uses-vars': 1,
+    'react/prop-types': [2],
     'arrow-body-style': ['error', 'as-needed'],
   },
 };
