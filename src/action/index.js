@@ -14,13 +14,15 @@ const actions = _.mapKeys(
     ...createActions({
       UPDATE_ITEM_INPUT: (input) => ({ input }),
     }),
-    SUBMIT_ITEM: () => (dispatch, getState) => {
+    SUBMIT_ITEM: (deps = {}) => (dispatch, getState) => {
+      _.defaults(deps, { actions });
+
       const { itemInput, addItemInProgress } = getState();
       if (addItemInProgress || itemInput === '') {
         return;
       }
 
-      dispatch(actions.addItem(itemInput));
+      dispatch(deps.actions.addItem(itemInput));
     },
     ...createFetchActions({
       type: 'FETCH_ITEMS',
