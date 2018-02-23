@@ -47,17 +47,6 @@ class App extends Component {
     } = this.props;
     return (
       <div className="App">
-        {items.length === 0 ? "There's no item in the list, please add one. :)" : ''}
-        <ul>
-          {items.map((item) => (
-            <li key={item.id}>
-              {item.name}
-              <button disabled={item.removingInProgress} onClick={() => removeItem(item.id)}>
-                X
-              </button>
-            </li>
-          ))}
-        </ul>
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -75,6 +64,17 @@ class App extends Component {
           />
           <input disabled={addItemInProgress} type="submit" value="Add" />
         </form>
+        {items.length === 0 ? "There's no item in the list, please add one. :)" : ''}
+        <ul>
+          {items.map((item) => (
+            <li key={item.id}>
+              {item.name}
+              <button disabled={item.removingInProgress} onClick={() => removeItem(item.id)}>
+                X
+              </button>
+            </li>
+          ))}
+        </ul>
         <ToastContainer type="error" hideProgressBar={true} />
       </div>
     );
