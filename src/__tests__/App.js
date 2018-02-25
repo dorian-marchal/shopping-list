@@ -6,23 +6,27 @@ import { mount } from 'enzyme';
 describe('App', () => {
   it('renders without crashing', () => {
     const props = {
-      fetchItems: _.noop,
-      addItemInProgress: false,
-      items: [
+      fetchAvailableProducts: _.noop,
+      fetchShoppingList: _.noop,
+      addAvailableProductInProgress: false,
+      products: [
         {
           id: 1,
           name: 'Poire',
-          removingInProgress: false,
+          checked: false,
+          waiting: false,
         },
         {
           id: 2,
           name: 'Pomme',
-          removingInProgress: false,
+          checked: false,
+          waiting: false,
         },
       ],
       itemInput: '',
-      removeItem: _.noop,
-      onSubmitItem: _.noop,
+      addToShoppingList: _.noop,
+      removeFromShoppingList: _.noop,
+      addAvailableProduct: _.noop,
       onInputChange: _.noop,
     };
     mount(<App {...props} />);

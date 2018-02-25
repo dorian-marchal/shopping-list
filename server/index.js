@@ -12,43 +12,78 @@ const { log } = console;
 
 const nextId = () => parseInt(_.uniqueId(), 10);
 
-let items = [
+let availableProducts = [
   { id: nextId(), name: 'Citron' },
   { id: nextId(), name: 'Lait' },
   { id: nextId(), name: 'Oeuf' },
+  { id: nextId(), name: 'Pain' },
+  { id: nextId(), name: 'Jambon' },
+  { id: nextId(), name: 'Ketchup' },
 ];
+
+let shoppingList = [availableProducts[0].id, availableProducts[3].id];
+
 router
-  .get('/items', async (ctx, next) => {
-    ctx.body = items;
+  .get('/availableProducts', async (ctx, next) => {
+    ctx.body = availableProducts;
     await next();
   })
 
-  .post('/items/add', async (ctx, next) => {
-    const { item } = ctx.request.body;
-    if (_.isString(item)) {
-      const newItem = { id: nextId(), name: item };
-      items = [...items, newItem];
-      ctx.body = newItem;
-      log(`Added item '${item}'`);
+  .post('/availableProducts/add', async (ctx, next) => {
+    const { productName } = ctx.request.body;
+    if (_.isString(productName)) {
+      const newProduct = {
+        id: nextId(),
+        name: productName,
+      };
+      availableProducts = [...availableProducts, newProduct];
+      ctx.body = newProduct;
+      log(`Added product '${productName}'`);
     } else {
       ctx.status = 400;
-      ctx.body = { error: '`item` parameter not found.' };
+      ctx.body = {
+        error: '`productName` parameter not found.',
+      };
     }
     await next();
   })
 
-  .post('/items/remove', async (ctx, next) => {
+  .get('/shoppingList', async (ctx, next) => {
+    ctx.body = shoppingList;
+    await next();
+  })
+
+  .post('/shoppingList/add', async (ctx, next) => {
     const { id } = ctx.request.body;
-    const itemToRemove = _.find(items, (item) => item.id === id);
-    if (itemToRemove) {
-      items = _.reject(items, (item) => item === itemToRemove);
-      ctx.status = 200;
-      log(`Removed item n°${id}`);
+    const product = _.find(availableProducts, ['id', id]);
+    if (_.isNil(product)) {
+      ctx.status = 400;
+      ctx.body = {
+        error: 'Product not found.',
+      };
     } else {
+      if (shoppingList.includes(id)) {
+        log(`Item '${product.name}' already in the list`);
+      } else {
+        shoppingList = [...shoppingList, product.id];
+        log(`Added item '${product.name}'`);
+      }
+      ctx.body = shoppingList;
+    }
+    await next();
+  })
+
+  .post('/shoppingList/remove', async (ctx, next) => {
+    const { id } = ctx.request.body;
+    if (!shoppingList.includes(id)) {
       ctx.status = 400;
       ctx.body = {
         error: `No item for ID ${id}`,
       };
+    } else {
+      shoppingList = shoppingList.filter((productId) => productId !== id);
+      ctx.body = shoppingList;
+      log(`Removed item n°${id}`);
     }
     await next();
   });

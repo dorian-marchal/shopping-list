@@ -3,57 +3,99 @@ import actions from '../action';
 import { handleActions } from 'redux-actions';
 
 const defaultState = {
+  availableProducts: [],
   itemInput: '',
-  fetchItemsInProgress: false,
-  addItemInProgress: false,
-  items: [],
+  fetchShoppingListInProgress: false,
+  fetchAvailableProductsInProgress: false,
+  addAvailableProductInProgress: false,
+  shoppingList: [],
 };
 
 const reducer = handleActions(
   {
-    [actions.fetchItemsPending]: (state) => ({
+    [actions.fetchAvailableProductsPending]: (state) => ({
       ...state,
-      fetchItemsInProgress: true,
+      fetchAvailableProductsInProgress: true,
     }),
-    [actions.fetchItemsSuccess]: (state, { payload }) => ({
+    [actions.fetchAvailableProductsSuccess]: (state, { payload }) => ({
       ...state,
-      fetchItemsInProgress: false,
-      items: payload.items,
+      fetchAvailableProductsInProgress: false,
+      availableProducts: payload.items,
     }),
-    [actions.fetchItemsError]: (state) => ({
+    [actions.fetchAvailableProductsError]: (state) => ({
       ...state,
-      fetchItemsInProgress: false,
+      fetchAvailableProductsInProgress: false,
     }),
-    [actions.addItemPending]: (state) => ({
+
+    [actions.addAvailableProductPending]: (state) => ({
       ...state,
-      addItemInProgress: true,
+      addAvailableProductInProgress: true,
     }),
-    [actions.addItemSuccess]: (state, { payload }) => ({
+    [actions.addAvailableProductSuccess]: (state, { payload }) => ({
       ...state,
       itemInput: '',
-      addItemInProgress: false,
-      items: [...state.items, payload.item],
+      addAvailableProductInProgress: false,
+      availableProducts: [...state.availableProducts, payload.item],
     }),
-    [actions.addItemError]: (state) => ({
+    [actions.addAvailableProductError]: (state) => ({
       ...state,
-      addItemInProgress: false,
+      addAvailableProductInProgress: false,
     }),
-    [actions.removeItemPending]: (state, { payload }) => ({
+
+    [actions.fetchShoppingListPending]: (state) => ({
       ...state,
-      items: state.items.map(
-        (item) => (item.id === payload.id ? { ...item, removingInProgress: true } : item),
+      fetchShoppingListInProgress: true,
+    }),
+    [actions.fetchShoppingListSuccess]: (state, { payload }) => ({
+      ...state,
+      fetchShoppingListInProgress: false,
+      shoppingList: payload.items,
+    }),
+    [actions.fetchShoppingListError]: (state) => ({
+      ...state,
+      fetchShoppingListInProgress: false,
+    }),
+
+    [actions.addToShoppingListPending]: (state, { payload }) => ({
+      ...state,
+      availableProducts: state.availableProducts.map(
+        (item) => (item.id === payload.id ? { ...item, waiting: true } : item),
       ),
     }),
-    [actions.removeItemSuccess]: (state, { payload }) => ({
+    [actions.addToShoppingListSuccess]: (state, { payload }) => ({
       ...state,
-      items: _.reject(state.items, (item) => item.id === payload.id),
-    }),
-    [actions.removeItemError]: (state, { payload }) => ({
-      ...state,
-      items: state.items.map(
-        (item) => (item.id === payload.id ? { ...item, removingInProgress: false } : item),
+      shoppingList: payload.shoppingList,
+      availableProducts: state.availableProducts.map(
+        (item) => (item.id === payload.id ? { ...item, waiting: false } : item),
       ),
     }),
+    [actions.addToShoppingListError]: (state, { payload }) => ({
+      ...state,
+      availableProducts: state.availableProducts.map(
+        (item) => (item.id === payload.id ? { ...item, waiting: false } : item),
+      ),
+    }),
+
+    [actions.removeFromShoppingListPending]: (state, { payload }) => ({
+      ...state,
+      availableProducts: state.availableProducts.map(
+        (item) => (item.id === payload.id ? { ...item, waiting: true } : item),
+      ),
+    }),
+    [actions.removeFromShoppingListSuccess]: (state, { payload }) => ({
+      ...state,
+      shoppingList: payload.shoppingList,
+      availableProducts: state.availableProducts.map(
+        (item) => (item.id === payload.id ? { ...item, waiting: false } : item),
+      ),
+    }),
+    [actions.removeFromShoppingListError]: (state, { payload }) => ({
+      ...state,
+      availableProducts: state.availableProducts.map(
+        (item) => (item.id === payload.id ? { ...item, waiting: false } : item),
+      ),
+    }),
+
     [actions.updateItemInput]: (state, { payload }) => ({
       ...state,
       itemInput: payload.input,

@@ -1,7 +1,7 @@
 import './App.css';
 
+import _ from 'lodash';
 import React, { Component } from 'react';
-
 import PropTypes from 'prop-types';
 import { ToastContainer } from 'react-toastify';
 import actions from './action';
@@ -9,40 +9,45 @@ import { connect } from 'react-redux';
 
 class App extends Component {
   static propTypes = {
-    fetchItems: PropTypes.func.isRequired,
-    addItemInProgress: PropTypes.bool.isRequired,
-    items: PropTypes.arrayOf(
+    fetchAvailableProducts: PropTypes.func.isRequired,
+    fetchShoppingList: PropTypes.func.isRequired,
+    addAvailableProductInProgress: PropTypes.bool.isRequired,
+    products: PropTypes.arrayOf(
       PropTypes.shape({
         id: PropTypes.number.isRequired,
         name: PropTypes.string.isRequired,
-        removingInProgress: PropTypes.bool.isRequired,
+        checked: PropTypes.bool.isRequired,
+        waiting: PropTypes.bool.isRequired,
       }),
     ).isRequired,
     itemInput: PropTypes.string.isRequired,
-    removeItem: PropTypes.func.isRequired,
-    onSubmitItem: PropTypes.func.isRequired,
+    addToShoppingList: PropTypes.func.isRequired,
+    removeFromShoppingList: PropTypes.func.isRequired,
+    addAvailableProduct: PropTypes.func.isRequired,
     onInputChange: PropTypes.func.isRequired,
   };
 
   componentDidMount() {
-    const { fetchItems } = this.props;
-    fetchItems();
+    const { fetchAvailableProducts, fetchShoppingList } = this.props;
+    fetchAvailableProducts();
+    fetchShoppingList();
   }
 
   componentDidUpdate(prevProps) {
     // Prevent losing focus when submitting an item.
-    if (prevProps.addItemInProgress && !this.props.addItemInProgress) {
+    if (prevProps.addAvailableProductInProgress && !this.props.addAvailableProductInProgress) {
       this.input.focus();
     }
   }
 
   render() {
     const {
-      items,
+      products,
       itemInput,
-      addItemInProgress,
-      removeItem,
-      onSubmitItem,
+      addAvailableProductInProgress,
+      addToShoppingList,
+      removeFromShoppingList,
+      addAvailableProduct,
       onInputChange,
     } = this.props;
     return (
@@ -50,28 +55,39 @@ class App extends Component {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            onSubmitItem();
+
+            if (addAvailableProductInProgress || itemInput === '') {
+              return;
+            }
+            addAvailableProduct(itemInput);
           }}
         >
           <input
             ref={(input) => {
               this.input = input;
             }}
-            disabled={addItemInProgress}
+            disabled={addAvailableProductInProgress}
             value={itemInput}
             type="text"
             onChange={(e) => onInputChange(e.target.value)}
           />
-          <input disabled={addItemInProgress} type="submit" value="Add" />
+          <input disabled={addAvailableProductInProgress} type="submit" value="Add" />
         </form>
-        {items.length === 0 ? "There's no item in the list, please add one. :)" : ''}
+        {products.length === 0 ? "There's no item in the list, please add one. :)" : ''}
         <ul>
-          {items.map((item) => (
-            <li key={item.id}>
+          {products.map((item) => (
+            <li
+              key={item.id}
+              onClick={() => {
+                if (item.checked) {
+                  removeFromShoppingList(item.id);
+                } else {
+                  addToShoppingList(item.id);
+                }
+              }}
+            >
               {item.name}
-              <button disabled={item.removingInProgress} onClick={() => removeItem(item.id)}>
-                X
-              </button>
+              <input type="checkbox" checked={item.checked} disabled={item.waiting} />
             </li>
           ))}
         </ul>
@@ -81,11 +97,26 @@ class App extends Component {
   }
 }
 
-export default connect((state) => state, {
-  onInputChange: actions.updateItemInput,
-  onSubmitItem: actions.submitItem,
-  removeItem: actions.removeItem,
-  fetchItems: actions.fetchItems,
-})(App);
+export default connect(
+  (state) => ({
+    addAvailableProductInProgress: state.addAvailableProductInProgress,
+    availableProducts: state.availableProducts,
+    products: state.availableProducts.map((product) => ({
+      id: product.id,
+      name: product.name,
+      checked: state.shoppingList.includes(product.id),
+      waiting: product.waiting,
+    })),
+    itemInput: state.itemInput,
+  }),
+  {
+    onInputChange: actions.updateItemInput,
+    addAvailableProduct: actions.addAvailableProduct,
+    addToShoppingList: actions.addToShoppingList,
+    removeFromShoppingList: actions.removeFromShoppingList,
+    fetchAvailableProducts: actions.fetchAvailableProducts,
+    fetchShoppingList: actions.fetchShoppingList,
+  },
+)(App);
 
 export { App as _App };
