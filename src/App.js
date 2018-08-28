@@ -1,7 +1,6 @@
 import './App.css';
 
-import _ from 'lodash';
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { ToastContainer } from 'react-toastify';
 import actions from './action';
@@ -12,6 +11,7 @@ class App extends Component {
     fetchAvailableProducts: PropTypes.func.isRequired,
     fetchShoppingList: PropTypes.func.isRequired,
     addAvailableProductInProgress: PropTypes.bool.isRequired,
+    fetchingProductsInProgress: PropTypes.bool.isRequired,
     products: PropTypes.arrayOf(
       PropTypes.shape({
         id: PropTypes.number.isRequired,
@@ -44,6 +44,7 @@ class App extends Component {
     const {
       products,
       itemInput,
+      fetchingProductsInProgress,
       addAvailableProductInProgress,
       addToShoppingList,
       removeFromShoppingList,
@@ -52,6 +53,9 @@ class App extends Component {
     } = this.props;
     return (
       <div className="App">
+        {/* <ProductInput /> */}
+        {/* <ProductList /> */}
+        {/*  - <Product /> */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -73,24 +77,30 @@ class App extends Component {
           />
           <input disabled={addAvailableProductInProgress} type="submit" value="Add" />
         </form>
-        {products.length === 0 ? "There's no item in the list, please add one. :)" : ''}
-        <ul>
-          {products.map((item) => (
-            <li
-              key={item.id}
-              onClick={() => {
-                if (item.checked) {
-                  removeFromShoppingList(item.id);
-                } else {
-                  addToShoppingList(item.id);
-                }
-              }}
-            >
-              {item.name}
-              <input type="checkbox" checked={item.checked} disabled={item.waiting} />
-            </li>
-          ))}
-        </ul>
+        {fetchingProductsInProgress ? (
+          'Loading...'
+        ) : (
+          <Fragment>
+            {products.length === 0 ? "There's no item in the list, please add one. :)" : ''}
+            <ul>
+              {products.map((item) => (
+                <li
+                  key={item.id}
+                  onClick={() => {
+                    if (item.checked) {
+                      removeFromShoppingList(item.id);
+                    } else {
+                      addToShoppingList(item.id);
+                    }
+                  }}
+                >
+                  {item.name}
+                  <input type="checkbox" checked={item.checked} disabled={item.waiting} />
+                </li>
+              ))}
+            </ul>
+          </Fragment>
+        )}
         <ToastContainer type="error" hideProgressBar={true} />
       </div>
     );
@@ -99,6 +109,8 @@ class App extends Component {
 
 export default connect(
   (state) => ({
+    fetchingProductsInProgress:
+      state.fetchShoppingListInProgress || state.fetchAvailableProductsInProgress,
     addAvailableProductInProgress: state.addAvailableProductInProgress,
     availableProducts: state.availableProducts,
     products: state.availableProducts.map((product) => ({
